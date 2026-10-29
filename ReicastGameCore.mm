@@ -176,15 +176,19 @@ volatile bool has_init = false;
 
 - (void)stopEmulation
 {
-
     NSLog(@"Stopping Emulation Core");
-    //We need this sleep for now until I find a better way of making sure the save is completed
-    usleep (10000);
-    
+
+    // Stop and join the emulation thread before tearing anything down: dc_term()
+    // destroys the JIT blocks and the memory they point into, and the SH4 thread
+    // would otherwise still be running - and linking - blocks at that point,
+    // which crashed the helper on every exit.
+    if (has_init)
+        dc_stop();
+
     dc_term();
-    
+
     has_init = false;
-    
+
     [super stopEmulation];
 }
 
