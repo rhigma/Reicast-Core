@@ -125,6 +125,11 @@ volatile bool has_init = false;
     
     //Register our own audio backend
     RegisterAudioBackend(&audiobackend_openemu);
+    // Select it explicitly. With "auto", reicast takes the first backend after
+    // sorting by slug, which is its own CoreAudio backend ("coreaudio" sorts
+    // before "openemu"). That one plays directly out of its 512-sample ring
+    // buffer and bypasses OpenEmu's mixer, which produces rhythmic crackle.
+    cfgSetVirtual("audio", "backend", "openemu");
     
     // Set battery save dir
     NSURL *SavesDirectory = [NSURL fileURLWithPath:[self batterySavesDirectoryPath]];
